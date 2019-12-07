@@ -8,7 +8,7 @@
   (->>
    (iterate calculate-fuel weight)
    (take-while (partial < 0))
-   rest
+   rest ;; can be avoided by using the intermediate calculation for part 1 as func. input
    (apply +)))
 
 (defn process-input [input]
