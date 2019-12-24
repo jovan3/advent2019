@@ -1,6 +1,8 @@
 (ns advent2019.day2
   (:require [clojure.string :as str]))
 
+(def op-map {1 + 2 *})
+
 (defn process-input [input]
   (let [input-vector (->>
                       (str/split input #",")
