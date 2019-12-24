@@ -18,11 +18,18 @@
         adj-pairs (partition 2 1 num)]
     (some (fn [[x y]] (= x y)) adj-pairs)))
 
-(defn count-num [[from to]]
+(defn part2 [number]
+  (some (fn [x] (= 2 (.length (str/join "" x))))
+        (let [num (str number)]
+          (partition-by identity num))))
+
+(defn find-matches [[from to] adj-predicate]
   (->>
    (range from to)
    (filter non-decreasing?)
-   (filter two-adj-digits-same?)))
+   (filter adj-predicate)))
 
 (defn day4 [input]
-  (println "day 4 part 1: " (count (count-num (process-input input)))))
+  (println "day 4 part 1: " (count (find-matches (process-input input) two-adj-digits-same?)))
+  (println "day 4 part 2: " (count (find-matches (process-input input) part2))))
+
