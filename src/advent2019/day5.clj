@@ -7,11 +7,11 @@
              4 [:out 2]
              99 [:halt nil]})
 
+(def modes {0 :position 1 :immediate})
+
 (defn resolve-value [[value mode] prog]
   (cond (= mode :immediate) value
         (= mode :position) (nth prog value)))
-
-(def modes {0 :position 1 :immediate})
 
 (defn parse-modes [opcode]
   (let [padded-opcode (format "%05d" opcode)
