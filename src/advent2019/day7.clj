@@ -1,6 +1,5 @@
 (ns advent2019.day7
-  (:require [clojure.string :as str]
-            [clojure.math.combinatorics :as combi])
+  (:require [clojure.math.combinatorics :as combi])
   (:use [advent2019.day5 :as com]))
 
 (defn calculate-signal [prog input-sequence]
