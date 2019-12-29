@@ -37,39 +37,42 @@
                str
                Integer/parseInt))))
 
-(take 3 (repeat 3))
 (defn exec [prog input-values]
   (loop [position 0
          current-prog prog
-         input-value-index 0]
+         input-index 0
+         out-val nil]
     (let [instruction (nth current-prog position)
           [op size] (get-op instruction)
           modes (parse-modes instruction)
           operands (take (dec size) (drop (inc position) current-prog))]
       (cond (= :out op)
-            (do (println "out" (nth current-prog (first operands))) (recur (+ position size) current-prog input-value-index))
-            (= :in op) (recur (+ position size) (assoc current-prog (first operands) (nth input-values input-value-index)) (inc input-value-index))
-            (= :halt op) (println "done")
+            (do
+              (let [out-value (nth current-prog (first operands))] 
+                (recur (+ position size) current-prog input-index out-value)))
+            (= :in op) (recur (+ position size) (assoc current-prog (first operands) (nth input-values input-index)) (inc input-index) out-val)
+            (= :halt op) out-val
             :else
             (let [operand-modes (partition 2 (interleave operands modes))
-                  resolved-operands (map #(resolve-value % current-prog) operand-modes)]
+                  resolved-operands (map #(resolve-value % current-prog) operand-modes)
+                  new-pos (+ position size)]
               (cond (= :jit op) (if-not (zero? (first resolved-operands))
-                                  (recur (second resolved-operands) current-prog input-value-index)
-                                  (recur (+ position size) current-prog input-value-index))
+                                  (recur (second resolved-operands) current-prog input-index out-val)
+                                  (recur new-pos current-prog input-index out-val))
                     (= :jif op) (if (zero? (first resolved-operands))
-                                  (recur (second resolved-operands) current-prog input-value-index)
-                                  (recur (+ position size) current-prog input-value-index))
+                                  (recur (second resolved-operands) current-prog input-index out-val)
+                                  (recur new-pos current-prog input-index out-val))
                     (= :lt op) (let [first (first resolved-operands)
                                      second (second resolved-operands)
                                      lt-val (if (< first second) 1 0)]
-                                 (recur (+ position size) (assoc current-prog (last operands) lt-val) input-value-index))
+                                 (recur new-pos (assoc current-prog (last operands) lt-val) input-index out-val))
                     (= :eq op) (let [first (first resolved-operands)
                                      second (second resolved-operands)
                                      eq-val (if (= first second) 1 0)]
-                                 (recur (+ position size) (assoc current-prog (last operands) eq-val) input-value-index))
+                                 (recur new-pos (assoc current-prog (last operands) eq-val) input-index out-val))
                     :else
                     (let [new-prog (assoc current-prog (last operands) (apply op (butlast resolved-operands)))]
-                      (recur (+ position size) new-prog input-value-index))))))))
+                      (recur new-pos new-prog input-index out-val))))))))
 
 
 (defn process-input [input]
